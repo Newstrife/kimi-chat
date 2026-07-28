@@ -1,0 +1,5 @@
+=> Booting Puma
+=> Rails 8.1.3 application starting in development 
+=> Run `bin/rails server --help` for more startup options
+A server is already running (pid: 21236, file: E:/brjaiagent/kimi_chat/tmp/pids/server.pid).
+Exiting

@@ -1,0 +1,68 @@
+# 企业数据库多数据源配置（只读访问）。
+#
+# 每个命名数据源支持以下字段：
+#   enabled:         是否启用（true/false）
+#   adapter:         sqlite3 / postgresql / mysql2 / sqlserver
+#   database:        数据库名或 SQLite 文件路径
+#   host/port:       网络数据库的连接地址（sqlite3 不需要）
+#   username/password: 账号密码（建议用 ENV 注入，见下方示例）
+#   max_rows:        单次查询最多返回行数（默认 100）
+#   timeout_seconds: 连接/查询超时秒数（默认 5）
+#   sample_rows:     检索注入时每表采样的行数（默认 10）
+#
+# 注意：postgresql / mysql2 / sqlserver 需要先在 Gemfile 中取消对应 gem
+# （pg / mysql2 / tiny_tds）的注释并运行 bundle install。
+
+default: &default
+  enabled: false
+  max_rows: 100
+  timeout_seconds: 5
+  sample_rows: 10
+
+company: &company
+  <<: *default
+  enabled: true
+  adapter: sqlite3
+  # 兼容旧环境变量：ENTERPRISE_DB_PATH 优先，其次 ENTERPRISE_DATA_DIR/company.db
+  database: <%= ENV["ENTERPRISE_DB_PATH"] || File.join(ENV["ENTERPRISE_DATA_DIR"] || "E:/brjaiagent/enterprise_data", "company.db") %>
+
+# ---------------- 其他数据库示例（按需取消注释并修改） ----------------
+
+# pg_example:
+#   <<: *default
+#   enabled: true
+#   adapter: postgresql
+#   database: mydb
+#   host: <%= ENV["PG_HOST"] || "127.0.0.1" %>
+#   port: <%= ENV["PG_PORT"] || 5432 %>
+#   username: <%= ENV["PG_USER"] %>
+#   password: <%= ENV["PG_PASSWORD"] %>
+
+# mysql_example:
+#   <<: *default
+#   enabled: true
+#   adapter: mysql2
+#   database: mydb
+#   host: <%= ENV["MYSQL_HOST"] || "127.0.0.1" %>
+#   port: <%= ENV["MYSQL_PORT"] || 3306 %>
+#   username: <%= ENV["MYSQL_USER"] %>
+#   password: <%= ENV["MYSQL_PASSWORD"] %>
+
+# sqlserver_example:
+#   <<: *default
+#   enabled: true
+#   adapter: sqlserver
+#   database: mydb
+#   host: <%= ENV["MSSQL_HOST"] || "127.0.0.1" %>
+#   port: <%= ENV["MSSQL_PORT"] || 1433 %>
+#   username: <%= ENV["MSSQL_USER"] %>
+#   password: <%= ENV["MSSQL_PASSWORD"] %>
+
+development:
+  company: *company
+
+test:
+  company: *company
+
+production:
+  company: *company

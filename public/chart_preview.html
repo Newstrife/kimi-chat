@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chart 渲染预览</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f3f4f6; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 20px; }
+  h1 { font-size: 18px; }
+  .msg { max-width: 100%; padding: 10px 14px; border-radius: 12px; line-height: 1.6; word-break: break-word; font-size: 14px;
+         background: #fff; color: #111827; margin-bottom: 16px; }
+  .msg p { margin: 8px 0; }
+  .msg h1, .msg h2, .msg h3 { margin: 12px 0 6px; line-height: 1.4; }
+  .msg h1 { font-size: 20px; } .msg h2 { font-size: 18px; } .msg h3 { font-size: 16px; }
+  .msg table { border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+  .msg th, .msg td { border: 1px solid #d1d5db; padding: 5px 10px; }
+  .msg th { background: #e5e7eb; font-weight: 600; }
+  .msg pre { background: #1f2937; color: #e5e7eb; border-radius: 8px; padding: 10px 12px; overflow-x: auto; margin: 8px 0; }
+  .msg pre code { background: transparent; color: inherit; padding: 0; }
+  .msg code { background: #e5e7eb; border-radius: 4px; padding: 1px 5px; font-size: 13px; font-family: Consolas, "Courier New", monospace; }
+  /* 与聊天页一致的图表样式 */
+  .msg .chart-container { max-width: 100%; height: 320px; background: #fff; border-radius: 8px; padding: 12px; margin: 8px 0; border: 1px solid #e5e7eb; }
+  .msg .chart-container canvas { max-width: 100%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Chart 渲染预览（柱状图 / 折线图 / 饼图 / 解析失败降级）</h1>
+  <div id="demo-bar" class="msg"></div>
+  <div id="demo-line" class="msg"></div>
+  <div id="demo-pie" class="msg"></div>
+  <div id="demo-bad" class="msg"></div>
+</div>
+
+<script src="/vendor/marked.min.js"></script>
+<script src="/vendor/purify.min.js"></script>
+<script src="/vendor/chart.umd.min.js"></script>
+<script src="/js/markdown-render.js"></script>
+<script src="/js/chart-render.js"></script>
+<script>
+  var samples = {
+    'demo-bar': '以下是各季度销售额对比（单位：万元）：\n\n```chart\n{"type":"bar","title":"季度销售额对比","labels":["Q1","Q2","Q3","Q4"],"series":[{"name":"2024 年","data":[120,180,150,220]},{"name":"2025 年","data":[140,200,190,260]}]}\n```\n\n可以看到 2025 年各季度均有增长。',
+    'demo-line': '近 6 个月活跃用户数趋势：\n\n```chart\n{"type":"line","title":"月活跃用户数趋势","labels":["2月","3月","4月","5月","6月","7月"],"series":[{"name":"活跃用户","data":[820,950,1010,980,1150,1300]}]}\n```',
+    'demo-pie': '产品线收入占比：\n\n```chart\n{"type":"pie","title":"产品线收入占比","labels":["硬件","软件","服务","其他"],"series":[{"name":"收入占比","data":[45,30,18,7]}]}\n```',
+    'demo-bad': '下面这个 chart 块 JSON 不合法，应当降级为普通代码块原样展示：\n\n```chart\n{"type":"bar", labels: [不是合法 JSON]}\n```'
+  };
+
+  Object.keys(samples).forEach(function (id) {
+    var el = document.getElementById(id);
+    var rendered = renderMessageWithCharts(samples[id]);
+    el.innerHTML = rendered.html;
+    mountCharts(rendered.charts);
+  });
+
+  // DOMPurify 验证：默认 html profile 不应过滤 canvas 与 div.chart-container
+  var probe = DOMPurify.sanitize('<div class="chart-container"><canvas id="probe"></canvas></div>', { USE_PROFILES: { html: true } });
+  console.log('DOMPurify 保留 canvas/div.chart-container:', probe.indexOf('<canvas') !== -1 && probe.indexOf('chart-container') !== -1, '->', probe);
+</script>
+</body>
+</html>

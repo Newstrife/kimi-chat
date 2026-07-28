@@ -1,0 +1,203 @@
+<% content_for(:title, "Kimi Chat") %>
+
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #f3f4f6; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
+  .chat-wrap { max-width: 720px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; background: #fff; box-shadow: 0 0 12px rgba(0,0,0,.06); }
+  header { padding: 14px 20px; border-bottom: 1px solid #e5e7eb; font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
+  header .new-chat, header .nav-link { font-size: 13px; font-weight: 400; color: #4f46e5; cursor: pointer; border: 1px solid #c7d2fe; border-radius: 6px; padding: 4px 10px; background: #fff; text-decoration: none; }
+  header .new-chat:hover, header .nav-link:hover { background: #eef2ff; }
+  header .actions { display: flex; gap: 8px; align-items: center; }
+  #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; font-size: 14px; }
+  .msg.user { align-self: flex-end; background: #4f46e5; color: #fff; border-bottom-right-radius: 4px; }
+  .msg.bot { align-self: flex-start; background: #f3f4f6; color: #111827; border-bottom-left-radius: 4px; }
+  /* bot 消息按 Markdown 渲染，不再保留 pre-wrap 的原始换行 */
+  .msg.bot { white-space: normal; }
+  .msg.bot > :first-child { margin-top: 0; }
+  .msg.bot > :last-child { margin-bottom: 0; }
+  .msg.bot p { margin: 8px 0; }
+  .msg.bot h1, .msg.bot h2, .msg.bot h3, .msg.bot h4, .msg.bot h5, .msg.bot h6 { margin: 12px 0 6px; line-height: 1.4; }
+  .msg.bot h1 { font-size: 20px; }
+  .msg.bot h2 { font-size: 18px; }
+  .msg.bot h3 { font-size: 16px; }
+  .msg.bot h4, .msg.bot h5, .msg.bot h6 { font-size: 14px; }
+  .msg.bot ul, .msg.bot ol { margin: 6px 0; padding-left: 22px; }
+  .msg.bot li { margin: 2px 0; }
+  .msg.bot table { border-collapse: collapse; margin: 8px 0; font-size: 13px; }
+  .msg.bot th, .msg.bot td { border: 1px solid #d1d5db; padding: 5px 10px; }
+  .msg.bot th { background: #e5e7eb; font-weight: 600; }
+  .msg.bot tbody tr:nth-child(even) { background: #e9eaee; }
+  .msg.bot pre { background: #1f2937; color: #e5e7eb; border-radius: 8px; padding: 10px 12px; overflow-x: auto; margin: 8px 0; }
+  .msg.bot pre code { background: transparent; color: inherit; padding: 0; }
+  .msg.bot code { background: #e5e7eb; border-radius: 4px; padding: 1px 5px; font-size: 13px; font-family: Consolas, "Courier New", monospace; }
+  .msg.bot blockquote { margin: 8px 0; padding: 2px 12px; border-left: 3px solid #9ca3af; color: #4b5563; }
+  /* AI 回答中的数据图表（Chart.js canvas） */
+  .msg.bot .chart-container { max-width: 100%; height: 320px; background: #fff; border-radius: 8px; padding: 12px; margin: 8px 0; border: 1px solid #e5e7eb; }
+  .msg.bot .chart-container canvas { max-width: 100%; }
+  .msg.error { align-self: flex-start; background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  .msg.thinking { color: #6b7280; font-style: italic; }
+  form { display: flex; gap: 10px; padding: 14px 20px; border-top: 1px solid #e5e7eb; }
+  #input { flex: 1; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 14px; outline: none; }
+  #input:focus { border-color: #4f46e5; }
+  button.send { background: #4f46e5; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 14px; cursor: pointer; }
+  button.send:disabled { background: #a5b4fc; cursor: not-allowed; }
+  .sources { align-self: flex-start; max-width: 80%; font-size: 12px; color: #6b7280; }
+  .sources summary { cursor: pointer; color: #4f46e5; }
+  .sources ul { margin: 4px 0 0; padding-left: 18px; }
+</style>
+
+<div class="chat-wrap">
+  <header>
+    <span>Kimi Chat（k3）</span>
+    <span class="actions">
+      <a class="nav-link" href="/databases">数据源</a>
+      <button type="button" class="new-chat" id="newChat">新会话</button>
+    </span>
+  </header>
+  <div id="messages"></div>
+  <form id="form">
+    <input id="input" placeholder="输入消息，回车发送…" autocomplete="off" autofocus>
+    <button type="submit" class="send" id="sendBtn">发送</button>
+  </form>
+</div>
+
+<script src="/vendor/marked.min.js"></script>
+<script src="/vendor/purify.min.js"></script>
+<script src="/vendor/chart.umd.min.js"></script>
+<script src="/js/markdown-render.js"></script>
+<script src="/js/chart-render.js"></script>
+<script>
+  const messages = document.getElementById('messages');
+  const form = document.getElementById('form');
+  const input = document.getElementById('input');
+  const sendBtn = document.getElementById('sendBtn');
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+  // session_id 存的是 ChatSession 主键 id
+  let sessionId = localStorage.getItem('kimi_chat_session_id') || null;
+  let knownCount = 0; // 已渲染到页面上的消息条数
+
+  function addMessage(text, cls) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + cls;
+    if (cls.split(' ').includes('bot')) {
+      // bot 消息按 Markdown 渲染（marked 解析 + DOMPurify 过滤 XSS），
+      // 其中的 ```chart 代码块渲染为 Chart.js 图表（需在 innerHTML 设置后再挂载）
+      const rendered = renderMessageWithCharts(text);
+      div.innerHTML = rendered.html;
+      messages.appendChild(div);
+      mountCharts(rendered.charts);
+      messages.scrollTop = messages.scrollHeight;
+      return div;
+    } else {
+      div.textContent = text;
+    }
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    return div;
+  }
+
+  // 可折叠小字展示本次回答引用的数据来源
+  function addSources(sources) {
+    if (!sources || !sources.length) return;
+    const details = document.createElement('details');
+    details.className = 'sources';
+    const summary = document.createElement('summary');
+    summary.textContent = '数据来源（' + sources.length + '）';
+    details.appendChild(summary);
+    const ul = document.createElement('ul');
+    sources.forEach((s) => {
+      const li = document.createElement('li');
+      li.textContent = (s.type === 'database' ? '数据库：' : '文件：') + s.name;
+      ul.appendChild(li);
+    });
+    details.appendChild(ul);
+    messages.appendChild(details);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  // 渲染服务器返回的消息列表中尚未显示的部分
+  function renderMessages(list) {
+    for (let i = knownCount; i < list.length; i++) {
+      const m = list[i];
+      addMessage(m.content, m.role === 'user' ? 'user' : 'bot');
+      if (m.sources && m.sources.length) addSources(m.sources);
+    }
+    knownCount = list.length;
+  }
+
+  async function fetchHistory() {
+    const res = await fetch('/chat/history?session_id=' + encodeURIComponent(sessionId));
+    if (!res.ok) return null;
+    return await res.json();
+  }
+
+  // 页面加载时拉取历史会话
+  (async () => {
+    if (!sessionId) return;
+    const data = await fetchHistory();
+    if (!data) {
+      sessionId = null;
+      localStorage.removeItem('kimi_chat_session_id');
+      return;
+    }
+    renderMessages(data.messages || []);
+  })();
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const prompt = input.value.trim();
+    if (!prompt) return;
+
+    addMessage(prompt, 'user');
+    knownCount += 1;
+    input.value = '';
+    sendBtn.disabled = true;
+    const thinking = addMessage('Kimi 思考中…（复杂问题可能需要 1 分钟左右）', 'bot thinking');
+
+    try {
+      const res = await fetch('/chat/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken },
+        body: JSON.stringify({ prompt, session_id: sessionId })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || ('请求失败: ' + res.status));
+
+      sessionId = data.session_id;
+      localStorage.setItem('kimi_chat_session_id', sessionId);
+
+      // 后台任务已启动，轮询历史直到出现助手回复（最多等 5 分钟）
+      const deadline = Date.now() + 5 * 60 * 1000;
+      let done = false;
+      while (!done && Date.now() < deadline) {
+        await new Promise((r) => setTimeout(r, 2500));
+        const hist = await fetchHistory();
+        if (hist && hist.messages.length > knownCount) {
+          thinking.remove();
+          renderMessages(hist.messages);
+          done = true;
+        }
+      }
+      if (!done) {
+        thinking.remove();
+        addMessage('等待超时：任务仍在后台执行，刷新页面可查看结果。', 'error');
+      }
+    } catch (err) {
+      thinking.remove();
+      addMessage('网络错误: ' + err.message, 'error');
+    }
+
+    sendBtn.disabled = false;
+    input.focus();
+  });
+
+  document.getElementById('newChat').addEventListener('click', () => {
+    sessionId = null;
+    localStorage.removeItem('kimi_chat_session_id');
+    messages.innerHTML = '';
+    knownCount = 0;
+    input.focus();
+  });
+</script>

@@ -35,14 +35,27 @@ class EnterpriseFileService
     end
     raise Error, "文件不存在: #{rel_path}" unless path.file?
 
-    # 按字节读取后做编码归一：优先 UTF-8；不是合法 UTF-8 时按 GBK 转码
-    # （国内企业环境常见 GBK/GB2312 编码的 Excel 导出文件），避免中文变乱码
+    # 按字节读取后做编码归一：
+    # 1. 合法 UTF-8 直接使用；
+    # 2. 仅少量无效字节（<1%，常见于截断边界字符或个别特殊符号）按 UTF-8 清洗；
+    # 3. 大量无效字节才判定为 GBK/GB2312（国内 Excel 导出常见）整体转码。
+    # 注意：MAX_BYTES 截断可能切在多字节字符中间，产生 1-2 个无效字节，
+    # 不能因此把整个文件误判为 GBK。
     raw = File.binread(path.to_s, MAX_BYTES)
-    content = raw.dup.force_encoding(Encoding::UTF_8)
-    unless content.valid_encoding?
-      content = raw.dup.force_encoding(Encoding::GBK)
-                   .encode(Encoding::UTF_8, invalid: :replace, undef: :replace)
-    end
+    utf8 = raw.dup.force_encoding(Encoding::UTF_8)
+    content =
+      if utf8.valid_encoding?
+        utf8
+      else
+        scrubbed = utf8.scrub
+        bad_ratio = scrubbed.length.zero? ? 0 : scrubbed.count("�").to_f / scrubbed.length
+        if bad_ratio < 0.01
+          scrubbed
+        else
+          raw.dup.force_encoding(Encoding::GBK)
+             .encode(Encoding::UTF_8, invalid: :replace, undef: :replace)
+        end
+      end
     content = content.scrub
 
     AuditLog.create!(action: "file_read", detail: rel_path.to_s, ip: ip)

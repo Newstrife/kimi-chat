@@ -1,12 +1,14 @@
 # frozen_string_literal: true
 
 # 企业数据检索注入：
-# 对用户 prompt 做简单关键词检索，取匹配度最高的前 2 个企业文件片段
-# （各截取 1500 字符），加上所有 enabled 数据库数据源的表结构和数据样例，
-# 拼成企业数据上下文。
+# 对用户 prompt 做简单关键词检索，文件得分达到阈值（绝对阈值 + 最高分 25%）
+# 即注入完整内容（单文件受 20KB 上限保护，超出标注截断），加上所有 enabled
+# 数据库数据源的表结构和数据样例，拼成企业数据上下文。
 class EnterpriseRetriever
-  MAX_FILES = 2
-  SNIPPET_CHARS = 1500
+  MIN_SCORE = 2                 # 入选绝对阈值：过滤纯噪声（一次文件名命中=3 分，两次内容命中=2 分）
+  RELATIVE_THRESHOLD = 0.25     # 入选相对阈值：不低于最高分的 25%，过滤弱相关
+  MAX_TOTAL_BYTES = 60 * 1024   # 所有文件注入内容的累计上限（唯一的总量控制，不限文件个数）
+  TOKEN_CONTENT_CAP = 10        # 单个关键词在单文件内容中的得分封顶（防日报类文件靠词频碾压）
   TEXT_EXTENSIONS = %w[.md .txt .csv .json .log].freeze
 
   # 返回 { context: String, sources: [{ type:, name: }] }
@@ -30,17 +32,33 @@ class EnterpriseRetriever
       content = EnterpriseFileService.read(rel_path, ip: ip)
       # 评分 = 内容命中 + 文件名命中 x3（文件名往往是信息密度最高的部分，
       # 例如"2026年销售情况.csv"的关键词全在文件名里）
-      score = tokens.sum { |t| content.scan(Regexp.escape(t)).size } +
+      score = tokens.sum { |t| [content.scan(Regexp.escape(t)).size, TOKEN_CONTENT_CAP].min } +
               tokens.sum { |t| rel_path.scan(Regexp.escape(t)).size } * 3
       scored << [score, rel_path, content] if score.positive?
     end
 
-    top = scored.sort_by { |score, _rel, _content| -score }.first(MAX_FILES)
+    # 入选规则：得分 >= MIN_SCORE 且 >= 最高分的 25% 即注入，不限文件个数，
+    # 仅受 MAX_TOTAL_BYTES 总量约束
+    top_score = scored.map(&:first).max || 0
+    selected = []
+    total_bytes = 0
+    scored.sort_by { |score, _rel, _content| -score }.each do |score, rel_path, content|
+      break if total_bytes >= MAX_TOTAL_BYTES
+      next if score < MIN_SCORE || score < top_score * RELATIVE_THRESHOLD
 
-    parts = top.map do |_score, rel_path, content|
-      "【企业文件：#{rel_path}】\n#{content[0, SNIPPET_CHARS]}"
+      selected << [score, rel_path, content]
+      total_bytes += content.bytesize
     end
-    sources = top.map { |_score, rel_path, _content| { type: "file", name: rel_path } }
+
+    # 初筛命中后注入完整文件内容（EnterpriseFileService.read 已有 20KB 上限，
+    # 文件超过上限时标注截断，避免模型误以为看到了全部内容）
+    parts = selected.map do |_score, rel_path, content|
+      full_path = EnterpriseFileService.root.join(rel_path).to_s
+      truncated = File.size(full_path) > EnterpriseFileService::MAX_BYTES
+      note = truncated ? "（文件较大，仅为前 #{EnterpriseFileService::MAX_BYTES / 1024}KB，非完整内容）" : "（完整内容）"
+      "【企业文件：#{rel_path}#{note}】\n#{content}"
+    end
+    sources = selected.map { |_score, rel_path, _content| { type: "file", name: rel_path } }
 
     database_summaries(ip: ip).each do |summary|
       parts << "【企业数据库 #{summary[:label]}（表结构 + 每表前 #{summary[:sample_rows]} 行数据）】\n#{summary[:text]}"

@@ -16,6 +16,8 @@ Rails.application.routes.draw do
   root "chat#index"
   post "chat/ask", to: "chat#ask"
   get "chat/history", to: "chat#history"
+  get "chat/sessions", to: "chat#sessions"
+  delete "chat/sessions/:id", to: "chat#destroy_session"
 
   # 企业数据库数据源只读管理页
   get "databases", to: "databases#index"

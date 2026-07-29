@@ -3,11 +3,52 @@
 <style>
   * { box-sizing: border-box; }
   body { margin: 0; background: #f3f4f6; font-family: "Segoe UI", "Microsoft YaHei", sans-serif; }
-  .chat-wrap { max-width: 720px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; background: #fff; box-shadow: 0 0 12px rgba(0,0,0,.06); }
+
+  /* ===== 整体双栏布局 ===== */
+  .app { display: flex; height: 100vh; }
+
+  /* ===== 左侧会话侧边栏 ===== */
+  #sidebar {
+    width: 260px; flex-shrink: 0; background: #111827; color: #e5e7eb;
+    display: flex; flex-direction: column;
+    transition: transform .2s ease;
+  }
+  #sidebar .new-chat-btn {
+    margin: 14px 12px; padding: 10px 12px; border: 1px solid #374151; border-radius: 8px;
+    background: #4f46e5; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer;
+    text-align: center; width: calc(100% - 24px);
+  }
+  #sidebar .new-chat-btn:hover { background: #4338ca; }
+  #sessionList { flex: 1; overflow-y: auto; padding: 0 8px 12px; }
+  .session-item {
+    position: relative; padding: 9px 34px 9px 12px; border-radius: 8px; cursor: pointer;
+    margin-bottom: 2px; color: #d1d5db;
+  }
+  .session-item:hover { background: #1f2937; }
+  .session-item.active { background: #374151; color: #fff; }
+  .session-item .s-title {
+    font-size: 13px; line-height: 1.4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .session-item .s-time { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+  .session-item .s-del {
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    display: none; border: none; background: transparent; color: #9ca3af;
+    font-size: 15px; cursor: pointer; padding: 2px 4px; border-radius: 4px; line-height: 1;
+  }
+  .session-item:hover .s-del { display: block; }
+  .session-item .s-del:hover { color: #f87171; background: #1f2937; }
+  #sessionList .empty-tip { font-size: 12px; color: #6b7280; text-align: center; padding: 20px 8px; }
+
+  /* ===== 右侧聊天区 ===== */
+  .chat-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; background: #fff; box-shadow: 0 0 12px rgba(0,0,0,.06); }
   header { padding: 14px 20px; border-bottom: 1px solid #e5e7eb; font-weight: 600; display: flex; align-items: center; justify-content: space-between; }
-  header .new-chat, header .nav-link { font-size: 13px; font-weight: 400; color: #4f46e5; cursor: pointer; border: 1px solid #c7d2fe; border-radius: 6px; padding: 4px 10px; background: #fff; text-decoration: none; }
-  header .new-chat:hover, header .nav-link:hover { background: #eef2ff; }
-  header .actions { display: flex; gap: 8px; align-items: center; }
+  header .left { display: flex; align-items: center; gap: 10px; }
+  header .menu-btn {
+    display: none; border: 1px solid #d1d5db; background: #fff; border-radius: 6px;
+    font-size: 16px; padding: 3px 9px; cursor: pointer; color: #374151; line-height: 1.3;
+  }
+  header .nav-link { font-size: 13px; font-weight: 400; color: #4f46e5; cursor: pointer; border: 1px solid #c7d2fe; border-radius: 6px; padding: 4px 10px; background: #fff; text-decoration: none; }
+  header .nav-link:hover { background: #eef2ff; }
   #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
   .msg { max-width: 80%; padding: 10px 14px; border-radius: 12px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; font-size: 14px; }
   .msg.user { align-self: flex-end; background: #4f46e5; color: #fff; border-bottom-right-radius: 4px; }
@@ -45,21 +86,35 @@
   .sources { align-self: flex-start; max-width: 80%; font-size: 12px; color: #6b7280; }
   .sources summary { cursor: pointer; color: #4f46e5; }
   .sources ul { margin: 4px 0 0; padding-left: 18px; }
+
+  /* ===== 窄屏：侧边栏默认隐藏，汉堡按钮开合 ===== */
+  @media (max-width: 767px) {
+    #sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 30; transform: translateX(-100%); }
+    #sidebar.open { transform: translateX(0); box-shadow: 4px 0 16px rgba(0,0,0,.3); }
+    header .menu-btn { display: block; }
+  }
 </style>
 
-<div class="chat-wrap">
-  <header>
-    <span>Kimi Chat（k3）</span>
-    <span class="actions">
+<div class="app">
+  <aside id="sidebar">
+    <button type="button" class="new-chat-btn" id="newChatBtn">＋ 新会话</button>
+    <div id="sessionList"></div>
+  </aside>
+
+  <div class="chat-wrap">
+    <header>
+      <span class="left">
+        <button type="button" class="menu-btn" id="menuBtn" title="会话列表">☰</button>
+        <span>Kimi Chat（k3）</span>
+      </span>
       <a class="nav-link" href="/databases">数据源</a>
-      <button type="button" class="new-chat" id="newChat">新会话</button>
-    </span>
-  </header>
-  <div id="messages"></div>
-  <form id="form">
-    <input id="input" placeholder="输入消息，回车发送…" autocomplete="off" autofocus>
-    <button type="submit" class="send" id="sendBtn">发送</button>
-  </form>
+    </header>
+    <div id="messages"></div>
+    <form id="form">
+      <input id="input" placeholder="输入消息，回车发送…" autocomplete="off" autofocus>
+      <button type="submit" class="send" id="sendBtn">发送</button>
+    </form>
+  </div>
 </div>
 
 <script src="/vendor/marked.min.js"></script>
@@ -72,6 +127,8 @@
   const form = document.getElementById('form');
   const input = document.getElementById('input');
   const sendBtn = document.getElementById('sendBtn');
+  const sidebar = document.getElementById('sidebar');
+  const sessionList = document.getElementById('sessionList');
   const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
   // session_id 存的是 ChatSession 主键 id
@@ -133,8 +190,129 @@
     return await res.json();
   }
 
-  // 页面加载时拉取历史会话
+  // ===== 侧边栏：会话列表 =====
+
+  // ISO 时间转相对时间（如"3 天前"）
+  function relativeTime(iso) {
+    const then = new Date(iso).getTime();
+    if (isNaN(then)) return '';
+    const diff = Math.max(0, Date.now() - then);
+    const min = Math.floor(diff / 60000);
+    if (min < 1) return '刚刚';
+    if (min < 60) return min + ' 分钟前';
+    const hour = Math.floor(min / 60);
+    if (hour < 24) return hour + ' 小时前';
+    const day = Math.floor(hour / 24);
+    if (day < 30) return day + ' 天前';
+    const month = Math.floor(day / 30);
+    if (month < 12) return month + ' 个月前';
+    return Math.floor(month / 12) + ' 年前';
+  }
+
+  function renderSessionList(list) {
+    sessionList.innerHTML = '';
+    if (!list.length) {
+      const tip = document.createElement('div');
+      tip.className = 'empty-tip';
+      tip.textContent = '暂无历史会话';
+      sessionList.appendChild(tip);
+      return;
+    }
+    list.forEach((s) => {
+      const item = document.createElement('div');
+      item.className = 'session-item' + (String(s.id) === String(sessionId) ? ' active' : '');
+      item.dataset.id = s.id;
+
+      const title = document.createElement('div');
+      title.className = 's-title';
+      title.textContent = s.title || ('会话 ' + s.id);
+      title.title = s.preview || s.title || '';
+
+      const time = document.createElement('div');
+      time.className = 's-time';
+      time.textContent = relativeTime(s.updated_at) + ' · ' + s.message_count + ' 条消息';
+
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 's-del';
+      del.title = '删除会话';
+      del.textContent = '✕';
+      del.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteSession(s.id, item);
+      });
+
+      item.appendChild(title);
+      item.appendChild(time);
+      item.appendChild(del);
+      item.addEventListener('click', () => switchSession(s.id));
+      sessionList.appendChild(item);
+    });
+  }
+
+  async function loadSessions() {
+    try {
+      const res = await fetch('/chat/sessions');
+      if (!res.ok) return;
+      renderSessionList(await res.json());
+    } catch (e) { /* 列表加载失败不影响聊天 */ }
+  }
+
+  // 切换到某个历史会话：重置聊天区并加载其消息
+  async function switchSession(id) {
+    if (String(id) === String(sessionId)) { closeSidebarOnMobile(); return; }
+    sessionId = String(id);
+    localStorage.setItem('kimi_chat_session_id', sessionId);
+    messages.innerHTML = '';
+    knownCount = 0;
+    sessionList.querySelectorAll('.session-item').forEach((el) => {
+      el.classList.toggle('active', el.dataset.id === String(id));
+    });
+    closeSidebarOnMobile();
+    const data = await fetchHistory();
+    if (data) renderMessages(data.messages || []);
+    input.focus();
+  }
+
+  async function deleteSession(id, itemEl) {
+    if (!confirm('确定删除该会话及其全部消息吗？')) return;
+    const res = await fetch('/chat/sessions/' + encodeURIComponent(id), {
+      method: 'DELETE',
+      headers: { 'X-CSRF-Token': csrfToken }
+    });
+    if (!res.ok) return;
+    itemEl.remove();
+    if (!sessionList.querySelector('.session-item')) loadSessions();
+    // 删除的是当前会话：同时清空聊天区
+    if (String(id) === String(sessionId)) {
+      sessionId = null;
+      localStorage.removeItem('kimi_chat_session_id');
+      messages.innerHTML = '';
+      knownCount = 0;
+    }
+  }
+
+  // 开启新会话（侧边栏按钮）：仅清空聊天区，等第一条消息发出后由后端创建会话
+  function startNewChat() {
+    sessionId = null;
+    localStorage.removeItem('kimi_chat_session_id');
+    messages.innerHTML = '';
+    knownCount = 0;
+    sessionList.querySelectorAll('.session-item.active').forEach((el) => el.classList.remove('active'));
+    closeSidebarOnMobile();
+    input.focus();
+  }
+
+  function closeSidebarOnMobile() {
+    if (window.innerWidth < 768) sidebar.classList.remove('open');
+  }
+
+  document.getElementById('newChatBtn').addEventListener('click', startNewChat);
+  document.getElementById('menuBtn').addEventListener('click', () => sidebar.classList.toggle('open'));
+
+  // 页面加载：拉取会话列表 + 恢复上次会话
   (async () => {
+    loadSessions();
     if (!sessionId) return;
     const data = await fetchHistory();
     if (!data) {
@@ -149,6 +327,8 @@
     e.preventDefault();
     const prompt = input.value.trim();
     if (!prompt) return;
+
+    const isNewSession = !sessionId; // 本条消息会在后端创建新会话
 
     addMessage(prompt, 'user');
     knownCount += 1;
@@ -167,6 +347,8 @@
 
       sessionId = data.session_id;
       localStorage.setItem('kimi_chat_session_id', sessionId);
+      // 新会话已创建：刷新侧边栏列表，让新条目（含后端生成的标题）出现并高亮
+      if (isNewSession) loadSessions();
 
       // 后台任务已启动，轮询历史直到出现助手回复（最多等 5 分钟）
       const deadline = Date.now() + 5 * 60 * 1000;
@@ -190,14 +372,6 @@
     }
 
     sendBtn.disabled = false;
-    input.focus();
-  });
-
-  document.getElementById('newChat').addEventListener('click', () => {
-    sessionId = null;
-    localStorage.removeItem('kimi_chat_session_id');
-    messages.innerHTML = '';
-    knownCount = 0;
     input.focus();
   });
 </script>

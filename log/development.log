@@ -9292,3 +9292,216 @@ Completed 200 OK in 9ms (Views: 0.2ms | ActiveRecord: 0.5ms (3 queries, 0 cached
   ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
   [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
   ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+Started GET "/chat/sessions" for 127.0.0.1 at 2026-07-29 10:00:23 +0800
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='KimiChat'*/[0m
+Processing by ChatController#sessions as HTML
+  [1m[36mChatSession Load (0.2ms)[0m  [1m[34mSELECT "chat_sessions".* FROM "chat_sessions" ORDER BY "chat_sessions"."updated_at" DESC LIMIT 50 /*action='sessions',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:48:in 'Enumerable#map'
+  [1m[36mMessage Load (0.2ms)[0m  [1m[34mSELECT "messages".* FROM "messages" WHERE "messages"."chat_session_id" IN (18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4) /*action='sessions',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:48:in 'Enumerable#map'
+Completed 200 OK in 535ms (Views: 0.2ms | ActiveRecord: 3.1ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started POST "/chat/ask" for 127.0.0.1 at 2026-07-29 10:00:24 +0800
+Processing by ChatController#ask as HTML
+  Parameters: {"prompt" => "自检测试：接口验证", "chat" => {"prompt" => "自检测试：接口验证"}}
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*action='ask',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:24:in 'ChatController#ask'
+  [1m[36mChatSession Create (1.7ms)[0m  [1m[32mINSERT INTO "chat_sessions" ("kimi_session_id", "title", "created_at", "updated_at") VALUES (NULL, '自检测试：接口验证', '2026-07-29 02:00:24.322525', '2026-07-29 02:00:24.322525') RETURNING "id" /*action='ask',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:24:in 'ChatController#ask'
+  [1m[36mTRANSACTION (2.8ms)[0m  [1m[35mCOMMIT TRANSACTION /*action='ask',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:24:in 'ChatController#ask'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*action='ask',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:25:in 'ChatController#ask'
+  [1m[36mMessage Create (2.1ms)[0m  [1m[32mINSERT INTO "messages" ("role", "content", "chat_session_id", "created_at", "updated_at", "sources") VALUES ('user', '自检测试：接口验证', 19, '2026-07-29 02:00:24.362041', '2026-07-29 02:00:24.362041', NULL) RETURNING "id" /*action='ask',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:25:in 'ChatController#ask'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*action='ask',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:25:in 'ChatController#ask'
+Completed 200 OK in 47ms (Views: 0.1ms | ActiveRecord: 6.9ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/chat/sessions" for 127.0.0.1 at 2026-07-29 10:00:24 +0800
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (2.0ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-JKE1.csv', '127.0.0.1', '2026-07-29 02:00:24.381340', '2026-07-29 02:00:24.381340') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (2.0ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-JKE2.csv', '127.0.0.1', '2026-07-29 02:00:24.387732', '2026-07-29 02:00:24.387732') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.7ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-JKE3.csv', '127.0.0.1', '2026-07-29 02:00:24.392802', '2026-07-29 02:00:24.392802') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (2.0ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-JKE4.csv', '127.0.0.1', '2026-07-29 02:00:24.397600', '2026-07-29 02:00:24.397600') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+Processing by ChatController#sessions as HTML
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.8ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-JKE5.csv', '127.0.0.1', '2026-07-29 02:00:24.403067', '2026-07-29 02:00:24.403067') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mChatSession Load (13.3ms)[0m  [1m[34mSELECT "chat_sessions".* FROM "chat_sessions" ORDER BY "chat_sessions"."updated_at" DESC LIMIT 50 /*action='sessions',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:48:in 'Enumerable#map'
+  [1m[36mMessage Load (0.3ms)[0m  [1m[34mSELECT "messages".* FROM "messages" WHERE "messages"."chat_session_id" IN (19, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4) /*action='sessions',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:48:in 'Enumerable#map'
+Completed 200 OK in 24ms (Views: 0.1ms | ActiveRecord: 13.6ms (2 queries, 0 cached) | GC: 0.0ms)
+
+
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (4.6ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-JKQ1.csv', '127.0.0.1', '2026-07-29 02:00:24.424181', '2026-07-29 02:00:24.424181') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+Started DELETE "/chat/sessions/999999999" for 127.0.0.1 at 2026-07-29 10:00:24 +0800
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.8ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-冷却水.csv', '127.0.0.1', '2026-07-29 02:00:24.432540', '2026-07-29 02:00:24.432540') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.4ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-压缩空气.csv', '127.0.0.1', '2026-07-29 02:00:24.438328', '2026-07-29 02:00:24.438328') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.5ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-水电气.csv', '127.0.0.1', '2026-07-29 02:00:24.455312', '2026-07-29 02:00:24.455312') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.8ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-注射用水.csv', '127.0.0.1', '2026-07-29 02:00:24.460820', '2026-07-29 02:00:24.460820') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.4ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年运行每日数据汇总-纯化水.csv', '127.0.0.1', '2026-07-29 02:00:24.466547', '2026-07-29 02:00:24.466547') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.5ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '2026年销售情况.csv', '127.0.0.1', '2026-07-29 02:00:24.471296', '2026-07-29 02:00:24.471296') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.9ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '产品价目表.csv', '127.0.0.1', '2026-07-29 02:00:24.486233', '2026-07-29 02:00:24.486233') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (12.3ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '会议纪要-2026Q2.md', '127.0.0.1', '2026-07-29 02:00:24.491451', '2026-07-29 02:00:24.491451') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.5ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '员工手册.md', '127.0.0.1', '2026-07-29 02:00:24.508184', '2026-07-29 02:00:24.508184') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.5ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '百瑞吉品牌一部考勤细则.txt', '127.0.0.1', '2026-07-29 02:00:24.526876', '2026-07-29 02:00:24.526876') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mAuditLog Create (1.6ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('file_read', '百瑞吉总部考勤规程.txt', '127.0.0.1', '2026-07-29 02:00:24.540015', '2026-07-29 02:00:24.540015') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_file_service.rb:61:in 'EnterpriseFileService.read'
+Processing by ChatController#destroy_session as HTML
+  Parameters: {"id" => "999999999"}
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mAuditLog Create (2.8ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('sql_query', '[company] SELECT name FROM sqlite_master WHERE type=''table'' AND name NOT LIKE ''sqlite_%'' ORDER BY name', '127.0.0.1', '2026-07-29 02:00:24.549422', '2026-07-29 02:00:24.549422') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mAuditLog Create (1.5ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('sql_query', '[company] SELECT * FROM departments', '127.0.0.1', '2026-07-29 02:00:24.555078', '2026-07-29 02:00:24.555078') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mAuditLog Create (1.3ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('sql_query', '[company] SELECT * FROM employees', '127.0.0.1', '2026-07-29 02:00:24.559487', '2026-07-29 02:00:24.559487') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mTRANSACTION (0.0ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mAuditLog Create (1.3ms)[0m  [1m[32mINSERT INTO "audit_logs" ("action", "detail", "ip", "created_at", "updated_at") VALUES ('sql_query', '[company] SELECT * FROM sales', '127.0.0.1', '2026-07-29 02:00:24.563366', '2026-07-29 02:00:24.563366') RETURNING "id" /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*application='KimiChat'*/[0m
+  ↳ app/services/enterprise_query_service.rb:248:in 'EnterpriseQueryService.audit'
+  [1m[36mChatSession Load (0.1ms)[0m  [1m[34mSELECT "chat_sessions".* FROM "chat_sessions" WHERE "chat_sessions"."id" = 19 LIMIT 1 /*application='KimiChat'*/[0m
+  ↳ app/services/chat_worker.rb:26:in 'block in ChatWorker#perform'
+  [1m[36mChatSession Load (0.1ms)[0m  [1m[34mSELECT "chat_sessions".* FROM "chat_sessions" WHERE "chat_sessions"."id" = 999999999 LIMIT 1 /*action='destroy_session',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:62:in 'ChatController#destroy_session'
+Completed 404 Not Found in 39ms (Views: 0.2ms | ActiveRecord: 0.1ms (1 query, 0 cached) | GC: 0.0ms)
+
+
+  [1m[36mMessage Count (0.2ms)[0m  [1m[34mSELECT COUNT(*) FROM "messages" WHERE "messages"."chat_session_id" = 19 /*application='KimiChat'*/[0m
+Started DELETE "/chat/sessions/19" for 127.0.0.1 at 2026-07-29 10:00:24 +0800
+Processing by ChatController#destroy_session as HTML
+  Parameters: {"id" => "19"}
+  [1m[36mChatSession Load (0.1ms)[0m  [1m[34mSELECT "chat_sessions".* FROM "chat_sessions" WHERE "chat_sessions"."id" = 19 LIMIT 1 /*action='destroy_session',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:62:in 'ChatController#destroy_session'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mBEGIN immediate TRANSACTION /*action='destroy_session',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:65:in 'ChatController#destroy_session'
+  [1m[36mMessage Load (2.0ms)[0m  [1m[34mSELECT "messages".* FROM "messages" WHERE "messages"."chat_session_id" = 19 /*action='destroy_session',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:65:in 'ChatController#destroy_session'
+  [1m[36mMessage Destroy (0.1ms)[0m  [1m[31mDELETE FROM "messages" WHERE "messages"."id" = 47 /*action='destroy_session',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:65:in 'ChatController#destroy_session'
+  [1m[36mChatSession Destroy (0.2ms)[0m  [1m[31mDELETE FROM "chat_sessions" WHERE "chat_sessions"."id" = 19 /*action='destroy_session',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:65:in 'ChatController#destroy_session'
+  [1m[36mTRANSACTION (0.1ms)[0m  [1m[35mCOMMIT TRANSACTION /*action='destroy_session',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:65:in 'ChatController#destroy_session'
+Completed 200 OK in 18ms (Views: 0.1ms | ActiveRecord: 2.5ms (4 queries, 0 cached) | GC: 15.6ms)
+
+
+  [1m[36mChatSession Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "chat_sessions" WHERE "chat_sessions"."id" = 19 LIMIT 1 /*application='KimiChat'*/[0m
+  [1m[36mMessage Exists? (0.1ms)[0m  [1m[34mSELECT 1 AS one FROM "messages" WHERE "messages"."chat_session_id" = 19 LIMIT 1 /*application='KimiChat'*/[0m
+Started GET "/" for 127.0.0.1 at 2026-07-29 10:00:47 +0800
+  [1m[36mActiveRecord::SchemaMigration Load (0.2ms)[0m  [1m[34mSELECT "schema_migrations"."version" FROM "schema_migrations" ORDER BY "schema_migrations"."version" ASC /*application='KimiChat'*/[0m
+Processing by ChatController#index as HTML
+  Rendering layout layouts/application.html.erb
+  Rendering chat/index.html.erb within layouts/application
+  Rendered chat/index.html.erb within layouts/application (Duration: 0.8ms | GC: 0.0ms)
+  Rendered layout layouts/application.html.erb (Duration: 4.6ms | GC: 0.0ms)
+Completed 200 OK in 187ms (Views: 45.9ms | ActiveRecord: 0.0ms (0 queries, 0 cached) | GC: 0.0ms)
+
+
+Started GET "/chat/sessions" for 127.0.0.1 at 2026-07-29 10:00:47 +0800
+Processing by ChatController#sessions as HTML
+  [1m[36mChatSession Load (0.2ms)[0m  [1m[34mSELECT "chat_sessions".* FROM "chat_sessions" ORDER BY "chat_sessions"."updated_at" DESC LIMIT 50 /*action='sessions',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:48:in 'Enumerable#map'
+  [1m[36mMessage Load (0.2ms)[0m  [1m[34mSELECT "messages".* FROM "messages" WHERE "messages"."chat_session_id" IN (18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4) /*action='sessions',application='KimiChat',controller='chat'*/[0m
+  ↳ app/controllers/chat_controller.rb:48:in 'Enumerable#map'
+Completed 200 OK in 89ms (Views: 0.2ms | ActiveRecord: 3.1ms (2 queries, 0 cached) | GC: 31.3ms)
+
+
